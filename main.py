@@ -137,9 +137,6 @@ def init_model(backbone, model_type):
 def estimate_depth_by_pytorch(img, model_params):
     model, transform, device = model_params
 
-    if img.ndim == 2: 
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
     original_image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) / 255.0
 
     resized_image = transform({"image": img})["image"]
@@ -172,9 +169,6 @@ def estimate_depth_by_pytorch(img, model_params):
 def estimate_depth_by_onnx(img, model_params):
     model, net_w, net_h, transform, input_name, output_name = model_params
 
-    if img.ndim == 2: 
-        img = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
-
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB) / 255.0
     img_input = transform({"image": img})["image"]
 
@@ -186,8 +180,8 @@ def estimate_depth_by_onnx(img, model_params):
         
     return depth_image
 
-def estimate_depth(panorama, backbone, model_params):
-    if backbone == "pytorch":
+def estimate_depth(panorama, backend, model_params):
+    if backend == "pytorch":
         return estimate_depth_by_pytorch(panorama, model_params)
     return estimate_depth_by_onnx(panorama, model_params)
     
@@ -243,15 +237,14 @@ def postprocess_stitching(stitched_img):
 def read_images(input_path):
     images = []
     image_paths = glob.glob(os.path.join(input_path, "*.jpg"))
+
     for image_path in image_paths:
         image = cv2.imread(image_path)
         images.append(image)
+
     return images
 
-
-def run(input_path, output_path, backend, model, threshold=0.94):
-
-    start = time.time()
+def run(input_path, output_path, backend, model):
 
     model_params = init_model(backend, model)
    
@@ -266,8 +259,6 @@ def run(input_path, output_path, backend, model, threshold=0.94):
         depth_image = estimate_depth(panorama, backend, model_params)
         
         cv2.imwrite(os.path.join(output_path, "panorama.png") , depth_image)
-
-    print(time.time() - start)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -292,10 +283,6 @@ if __name__ == "__main__":
         help='Model type'
     )
 
-    parser.add_argument('-th', '--threshold',
-        default='0.94',
-        help='Confidence threshold for stitching')
-
     args = parser.parse_args()
 
-    run(args.input, args.output, args.backend, args.model, args.threshold)
+    run(args.input, args.output, args.backend, args.model)

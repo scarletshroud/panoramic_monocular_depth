@@ -13,3 +13,5 @@
 - --backend - используемый фреймворк машинного обучения PyTorch/Onnx
 - --model - название использумой модели
 
+## Модели
+Квантизированные модели доступны для скачивания по ссылке - https://drive.google.com/drive/folders/1qI7ZmDV44D_Y-_CrpmGeNP-5w5zOsrHs?usp=drive_link
